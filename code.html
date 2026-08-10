@@ -1,0 +1,738 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Jasmine OS - Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&amp;family=Bricolage+Grotesque:wght@600;700&amp;family=Syne:wght@800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Satisfy&display=swap');
+        .cursive-signature { font-family: 'Satisfy', cursive; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* SF Pro system font stack — renders as SF Pro on Apple, Segoe UI on Windows */
+        body, button, input, textarea, select {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+        }
+        .squishy-hover { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .squishy-hover:hover { transform: scale(1.05); }
+        .draggable-window { position: absolute; }
+        .window-header { cursor: grab; }
+        .lcd-text {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .pastel-bg {
+            background: linear-gradient(135deg, #FFDEE9 0%, #E8D5F5 25%, #D5E8FC 50%, #D5F5E3 75%, #FFF9C4 100%);
+        }
+        .pastel-header {
+            background: linear-gradient(90deg, #FFB3BA 0%, #E8A0BF 20%, #C9B8D8 40%, #A8C8EA 60%, #BAE8C9 80%, #FFF3A8 100%);
+        }
+        #rotate-prompt {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            background: rgba(255, 255, 255, 0.12);
+            color: #2d1f3a;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 2rem;
+            text-align: center;
+        }
+        #rotate-prompt.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #rotate-prompt .rotate-card {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 219, 234, 0.95), rgba(255, 240, 211, 0.95));
+            border: 1px solid rgba(183, 169, 201, 0.4);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 0 30px 70px rgba(91, 73, 112, 0.18);
+        }
+        #rotate-prompt .rotate-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            color: #5b4970;
+        }
+        #rotate-prompt h2 {
+            color: #5b4970;
+        }
+        #rotate-prompt p {
+            color: #4e3c66;
+        }
+        #rotate-prompt button {
+            margin-top: 1.5rem;
+            background: #e8a0bf;
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 18px 35px rgba(216, 142, 157, 0.25);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        #rotate-prompt button:hover {
+            background: #d38ba9;
+            transform: translateY(-1px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "pink-main": "#E8A0BF",
+                        "navy-main": "#5B4970",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#eae5ad",
+                        "surface-container": "#F5F0FA",
+                        "on-tertiary-container": "#4e4b21",
+                        "surface-variant": "#F0EAF5",
+                        "on-tertiary-fixed": "#1e1c00",
+                        "surface-container-low": "#FAF7FD",
+                        "on-secondary-container": "#53637d",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#EDE6F3",
+                        "primary-container": "#F2D5E0",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#3D3247",
+                        "surface-dim": "#E8E0EF",
+                        "surface-container-high": "#EDE6F3",
+                        "on-secondary-fixed-variant": "#374860",
+                        "tertiary-fixed-dim": "#cec893",
+                        "surface-tint": "#B8A9C9",
+                        "on-primary-fixed": "#3d0025",
+                        "secondary-container": "#D5E8FC",
+                        "on-primary-fixed-variant": "#782953",
+                        "on-secondary-fixed": "#0a1c32",
+                        "primary": "#B8A9C9",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c0bb86",
+                        "tertiary": "#636034",
+                        "inverse-on-surface": "#ebf2f4",
+                        "on-primary-container": "#7b2c56",
+                        "inverse-primary": "#E8A0BF",
+                        "secondary-fixed-dim": "#b7c7e5",
+                        "on-background": "#5B4970",
+                        "secondary-fixed": "#d4e3ff",
+                        "surface-bright": "#FAF7FD",
+                        "on-tertiary-fixed-variant": "#4b481e",
+                        "outline-variant": "#E0D4E8",
+                        "outline": "#9B8BA6",
+                        "inverse-surface": "#2b3234",
+                        "primary-fixed-dim": "#E8A0BF",
+                        "on-surface-variant": "#6B5A78",
+                        "error": "#ba1a1a",
+                        "background": "#FFDEE9",
+                        "primary-fixed": "#ffd8e6",
+                        "secondary": "#8B9DC3",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#FFDEE9"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "window-padding": "24px",
+                        base: "8px",
+                        "desktop-margin": "32px",
+                        "icon-grid": "80px",
+                        gutter: "16px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Bricolage Grotesque"],
+                        "display-expressive": ["Syne"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Bricolage Grotesque"]
+                    },
+                    fontSize: {
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "label-sm": ["12px", { lineHeight: "1.2", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "1.3", fontWeight: "600" }],
+                        "display-expressive": ["48px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "800" }],
+                        "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
+                        "headline-lg": ["32px", { lineHeight: "1.2", fontWeight: "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&amp;display=swap" data-snapdom="injected-import"></head>
+<body class="bg-background text-on-background h-screen overflow-hidden relative font-body-md select-none">
+<!-- Background Layer -->
+<div class="absolute inset-0 z-0 pastel-bg"></div>
+<!-- TopAppBar -->
+<nav class="pastel-header flex justify-between items-center w-full px-desktop-margin h-8 fixed top-0 z-[100] shadow-sm">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-[18px] font-bold text-white tracking-tight">jPortfolio</span>
+<div class="hidden md:flex gap-4">
+<button class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm" onclick="openWindow('window-about')">About</button>
+<button class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm" onclick="openWindow('window-skills')">Skills</button>
+<button class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm" onclick="openWindow('window-projects')">Projects</button>
+<button class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm" onclick="openWindow('window-resume')">Resume</button>
+<a class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm" href="mailto:jasminetrip123@gmail.com">Contact</a>
+<div class="relative group">
+  <button class="text-white/90 hover:text-white transition-colors font-label-sm text-label-sm flex items-center gap-1">
+    Windows
+    <span class="material-symbols-outlined text-[14px]">keyboard_arrow_down</span>
+  </button>
+  <div class="absolute top-full left-0 mt-1 w-48 pastel-header border border-white/30 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all z-[110]">
+    <button onclick="document.querySelectorAll('.draggable-window:not(#window-profile):not(.sticky-note)').forEach(w =&gt; w.classList.add('opacity-0', 'pointer-events-none', 'scale-95'))" class="w-full text-left px-4 py-2 text-white hover:bg-white/20 text-label-sm font-label-sm transition-colors">
+      Close All Windows
+    </button>
+  </div>
+</div></div>
+</div>
+<div class="flex items-center gap-3 text-white">
+
+
+<span class="font-label-sm text-label-sm" id="clock">1:05 PM</span>
+</div>
+</nav>
+<div id="rotate-prompt" class="active" aria-live="polite" aria-label="Rotate your phone">
+    <div class="rotate-card">
+        <span class="rotate-icon material-symbols-outlined">screen_rotation</span>
+        <h2 class="font-headline-lg text-3xl font-bold mb-3">Rotate your phone</h2>
+        <p class="font-body-md text-base text-[#F8FAFC]/90 leading-relaxed">This site is designed for the desktop layout. For the best experience, please rotate your device to landscape.</p>
+        <button id="rotate-prompt-dismiss" class="mt-6 inline-flex items-center justify-center rounded-full bg-white text-[#5B4970] px-5 py-3 font-semibold shadow-lg hover:bg-[#f4f4f6] transition-colors">Continue anyway</button>
+    </div>
+</div>
+<!-- Desktop Area -->
+<main class="relative w-full h-full pt-8 z-10 flex">
+<!-- Desktop Icons (Grid) -->
+<div class="w-[120px] h-full p-desktop-margin flex flex-col gap-6 items-center z-10">
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="openWindow('window-about')">
+<div class="w-14 h-12 bg-[#FFB3BA] rounded-lg relative flex items-center justify-center shadow-lg">
+<div class="absolute -top-1 left-0 w-6 h-2 bg-[#FFB3BA] rounded-t-sm"></div>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">About Me</span>
+</button>
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="openWindow('window-projects')">
+<div class="w-14 h-12 bg-[#FFDFBA] rounded-lg relative flex items-center justify-center shadow-lg">
+<div class="absolute -top-1 left-0 w-6 h-2 bg-[#FFDFBA] rounded-t-sm"></div>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">Projects</span>
+</button>
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="openWindow('window-recents')">
+<div class="w-14 h-12 bg-[#FFFFBA] rounded-lg relative flex items-center justify-center shadow-lg">
+<div class="absolute -top-1 left-0 w-6 h-2 bg-[#FFFFBA] rounded-t-sm"></div>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">Recents</span>
+</button>
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="openWindow('window-resume')">
+<div class="w-14 h-12 bg-[#BAFFC9] rounded-lg relative flex items-center justify-center shadow-lg">
+<div class="absolute -top-1 left-0 w-6 h-2 bg-[#BAFFC9] rounded-t-sm"></div>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">Resume</span>
+</button>
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="openWindow('window-gallery')">
+<div class="w-14 h-12 bg-[#BAE1FF] rounded-lg relative flex items-center justify-center shadow-lg">
+<div class="absolute -top-1 left-0 w-6 h-2 bg-[#BAE1FF] rounded-t-sm"></div>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">Gallery</span>
+</button>
+<button class="flex flex-col items-center squishy-hover group w-20" onclick="toggleStickyNotes()">
+<div class="w-14 h-12 bg-[#E8D5F5] rounded-lg relative flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-[#5B4970] text-xl">sticky_note_2</span>
+</div>
+<span class="font-label-sm text-[10px] text-[#5B4970] py-0.5 backdrop-blur-sm truncate w-full text-center mt-1">Sticky Notes</span>
+</button>
+</div>
+<!-- Workspace Canvas (Active Windows) -->
+<div class="flex-1 h-full relative p-8">
+<!-- Main Profile Window -->
+<div class="draggable-window w-full max-w-2xl bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-20" id="window-profile" style="left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 51;">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">profile.txt</div>
+</div>
+<div class="p-8 flex flex-col md:flex-row gap-8 items-center bg-[#F2D5E0]/80 justify-center min-h-[280px]">
+<div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white/60 shadow-xl shrink-0">
+<img alt="Jasmine" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEaZT_GVVwpUOciNOWhGQe5rZGhuuJEnQQauVpQ3kS14ZBkX_3pFRe8tjxGAojmsyMMj2cWz7sriqzZ8vXCjaeUP1KK7ez229zdgB724PskvRTivI5aFjDPe46UA9iCe6nJt-4X-G2l5FtnzyjjIiVxQFLCCjR9fIpqsAgDhDBDuzW_PgssvprfkegVt69UJIN1n1wu8Bk15ZlZaxw1jYj7UBT9x5qv3moDdItzN2-Nd7jq7qyn7TFEgrsvkURpTlN23oy55NwKlg">
+</div>
+<div class="flex flex-col items-center md:items-start text-center md:text-left">
+<h1 class="cursive-signature text-6xl text-[#5B4970] mb-2">Jasmine Tripathy</h1>
+<p class="font-body-md text-body-md text-[#5B4970] font-semibold">AI/ML Engineer · Generative AI · LLMs</p>
+</div>
+</div>
+</div>
+<!-- About Me Window -->
+<div class="draggable-window w-full max-w-lg bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[150px] top-[100px] opacity-0 pointer-events-none scale-95" id="window-about" style="z-index: 53;">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-about')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">about_me.md</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-about')">close</button>
+</div>
+<div class="p-window-padding bg-[#FFB3BA]/10 h-[380px] overflow-y-auto text-[#5B4970]">
+<h2 class="font-headline-md text-xl mb-3 text-[#5B4970]">Jasmine Tripathy 🎀</h2>
+<p class="font-body-md text-[14px] text-[#5B4970] leading-relaxed">Hi, I'm Jasmine Tripathy, a Computer Science Engineering student with a keen interest in AI/ML and Generative AI. I enjoy building practical applications, experimenting with new technologies, and turning ideas into projects that are actually useful (and occasionally debugging them for much longer than expected).</p>
+<p class="font-body-md text-[14px] text-[#5B4970] leading-relaxed mt-3">My work so far has involved Machine Learning, NLP, Computer Vision, LLMs, LangChain, RAG, and AI-powered applications. I'm currently exploring AI agents, MCP, and LLM-based applications while continuing to build and learn along the way.</p>
+<p class="font-body-md text-[14px] text-[#5B4970] leading-relaxed mt-3">When I'm away from the code, you'll probably find me reading, watching anime or K-dramas, exploring cafés, listening to BTS, or getting unnecessarily excited about Hello Kitty. In short: I like learning, I like building, and I'm usually curious about what I can make next.</p>
+</div>
+</div>
+<!-- Projects Window -->
+<div class="draggable-window w-full max-w-2xl bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[200px] top-[150px] opacity-0 pointer-events-none scale-95" id="window-projects">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-projects')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">Projects</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-projects')">close</button>
+</div>
+<div class="flex h-[420px] bg-[#FFDFBA]/15">
+<!-- Sidebar -->
+<div class="w-[180px] min-w-[180px] border-r border-[#B8A9C9]/20 bg-white/30 p-3 flex flex-col gap-1 overflow-y-auto">
+<span class="font-label-sm text-[10px] text-[#5B4970]/60 uppercase tracking-widest mb-1 px-2">Projects</span>
+<button class="project-sidebar-item bg-[#E8A0BF]/15 text-left px-3 py-2 rounded-lg text-[13px] font-label-sm text-[#5B4970] hover:bg-[#E8A0BF]/25 transition-colors truncate" data-project="0" onclick="selectProject(0)">Kiri</button>
+<button class="project-sidebar-item text-left px-3 py-2 rounded-lg text-[13px] font-label-sm text-[#5B4970] hover:bg-[#E8A0BF]/25 transition-colors truncate" data-project="1" onclick="selectProject(1)">Atlas</button>
+<button class="project-sidebar-item text-left px-3 py-2 rounded-lg text-[13px] font-label-sm text-[#5B4970] hover:bg-[#E8A0BF]/25 transition-colors truncate" data-project="2" onclick="selectProject(2)">NexusParse</button>
+</div>
+<!-- Detail View -->
+<div class="flex-1 p-6 overflow-y-auto" id="project-detail">
+<h2 class="font-headline-lg text-[28px] font-bold text-[#5B4970] mb-1 leading-tight" id="proj-title">Kiri – GenAI Medical Assistant</h2>
+<p class="font-label-sm text-[11px] text-[#5B4970]/50 uppercase tracking-wider mb-4" id="proj-status">Completed · 2026</p>
+<p class="font-body-md text-[14px] text-[#5B4970]/90 leading-relaxed mb-5" id="proj-desc">A GenAI-powered medical assistant built to make healthcare conversations a little smarter and more accessible. Kiri uses LLMs and LangChain to understand user queries and generate context-aware responses, with a focus on conversational and multilingual interaction. Basically, a project where I taught AI to have slightly more useful conversations than "Have you tried turning it off and on again?"</p>
+<div class="flex flex-wrap gap-2 mb-4" id="proj-tags">
+<span class="text-[12px] bg-[#B8A9C9] text-white px-3 py-1 rounded-full font-label-sm">Python</span>
+<span class="text-[12px] bg-[#E8A0BF] text-white px-3 py-1 rounded-full font-label-sm">LangChain</span>
+<span class="text-[12px] bg-[#A8D8EA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">LLMs</span>
+<span class="text-[12px] bg-[#BAFFC9] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Generative AI</span>
+<span class="text-[12px] bg-[#FFB3BA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Flask</span>
+</div>
+<a href="https://github.com/strawberryminmin/kiri" target="_blank" rel="noopener" id="proj-github" class="inline-flex items-center gap-2 bg-[#5B4970]/10 hover:bg-[#5B4970]/20 text-[#5B4970] border border-[#5B4970]/20 px-4 py-1.5 rounded-full font-label-sm text-[12px] transition-colors">
+  <span class="material-symbols-outlined text-[14px]">open_in_new</span> View on GitHub
+</a>
+</div>
+</div>
+</div>
+<!-- Skills Window -->
+<div class="draggable-window w-full max-w-md bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[450px] top-[80px] opacity-0 pointer-events-none scale-95" id="window-skills">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-skills')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">skills.txt</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-skills')">close</button>
+</div>
+<div class="p-6 bg-[#E8D5F5]/15 overflow-y-auto" style="max-height: 420px;">
+<!-- AI / ML -->
+<p class="font-label-sm text-[10px] text-[#5B4970]/50 uppercase tracking-widest mb-2">AI / ML</p>
+<div class="flex flex-wrap gap-2 mb-5">
+<span class="text-[12px] bg-[#FFB3BA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Machine Learning</span>
+<span class="text-[12px] bg-[#FFDFBA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Deep Learning</span>
+<span class="text-[12px] bg-[#FFFFBA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">NLP</span>
+<span class="text-[12px] bg-[#BAFFC9] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Computer Vision</span>
+<span class="text-[12px] bg-[#BAE1FF] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">LLMs</span>
+<span class="text-[12px] bg-[#E8D5F5] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">RAG</span>
+<span class="text-[12px] bg-[#E8A0BF] text-white px-3 py-1 rounded-full font-label-sm">LangChain</span>
+</div>
+<!-- Languages -->
+<p class="font-label-sm text-[10px] text-[#5B4970]/50 uppercase tracking-widest mb-2">Languages</p>
+<div class="flex flex-wrap gap-2 mb-5">
+<span class="text-[12px] bg-[#B8A9C9] text-white px-3 py-1 rounded-full font-label-sm">Python</span>
+<span class="text-[12px] bg-[#FFB3BA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">JavaScript</span>
+<span class="text-[12px] bg-[#FFDFBA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">HTML/CSS</span>
+<span class="text-[12px] bg-[#BAFFC9] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">SQL</span>
+</div>
+<!-- Frameworks -->
+<p class="font-label-sm text-[10px] text-[#5B4970]/50 uppercase tracking-widest mb-2">Frameworks & Libraries</p>
+<div class="flex flex-wrap gap-2 mb-5">
+<span class="text-[12px] bg-[#BAE1FF] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">TensorFlow</span>
+<span class="text-[12px] bg-[#E8D5F5] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">PyTorch</span>
+<span class="text-[12px] bg-[#E8A0BF] text-white px-3 py-1 rounded-full font-label-sm">Flask</span>
+<span class="text-[12px] bg-[#FFFFBA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">React</span>
+<span class="text-[12px] bg-[#BAFFC9] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">OpenCV</span>
+</div>
+<!-- Tools -->
+<p class="font-label-sm text-[10px] text-[#5B4970]/50 uppercase tracking-widest mb-2">Tools</p>
+<div class="flex flex-wrap gap-2">
+<span class="text-[12px] bg-[#FFB3BA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Git</span>
+<span class="text-[12px] bg-[#FFDFBA] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Docker</span>
+<span class="text-[12px] bg-[#BAE1FF] text-[#5B4970] px-3 py-1 rounded-full font-label-sm">Figma</span>
+<span class="text-[12px] bg-[#B8A9C9] text-white px-3 py-1 rounded-full font-label-sm">VS Code</span>
+</div>
+</div>
+</div>
+<!-- Recents Window -->
+<div class="draggable-window w-full max-w-sm bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[250px] top-[200px] opacity-0 pointer-events-none scale-95" id="window-recents">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-recents')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">Recents</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-recents')">close</button>
+</div>
+<div class="p-window-padding bg-[#FFFFBA]/10 h-[250px] overflow-y-auto">
+<ul class="flex flex-col gap-2">
+<li class="flex items-center gap-3 p-2 hover:bg-white/40 rounded cursor-pointer transition-colors" onclick="openWindow('window-profile')">
+<span class="material-symbols-outlined text-[#E8A0BF]">description</span>
+<span class="text-sm font-label-sm text-[#5B4970] lcd-text">profile.txt</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/40 rounded cursor-pointer transition-colors" onclick="openWindow('window-about')">
+<span class="material-symbols-outlined text-[#FFB3BA]">folder</span>
+<span class="text-sm font-label-sm text-[#5B4970] lcd-text">About Me</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/40 rounded cursor-pointer transition-colors" onclick="openWindow('window-projects')">
+<span class="material-symbols-outlined text-[#FFDFBA]">code</span>
+<span class="text-sm font-label-sm text-[#5B4970] lcd-text">Projects</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/40 rounded cursor-pointer transition-colors" onclick="openWindow('window-resume')">
+<span class="material-symbols-outlined text-[#BAFFC9]">article</span>
+<span class="text-sm font-label-sm text-[#5B4970] lcd-text">Resume.pdf</span>
+</li>
+<li class="flex items-center gap-3 p-2 hover:bg-white/40 rounded cursor-pointer transition-colors" onclick="openWindow('window-skills')">
+<span class="material-symbols-outlined text-[#BAE1FF]">psychology</span>
+<span class="text-sm font-label-sm text-[#5B4970] lcd-text">Skills</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Resume Window -->
+<div class="draggable-window w-full max-w-2xl bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[300px] top-[50px] opacity-0 pointer-events-none scale-95" id="window-resume">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-resume')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">Resume.pdf</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-resume')">close</button>
+</div>
+<div class="bg-[#BAFFC9]/10 h-[500px] overflow-y-auto flex flex-col">
+<div class="flex justify-center gap-3 p-3 border-b border-[#B8A9C9]/20">
+<a href="jres.pdf" download class="flex items-center gap-2 bg-[#B8A9C9] text-white px-4 py-2 rounded-lg font-label-sm text-label-sm hover:bg-[#A898BA] transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+Download Resume
+</a>
+<a href="jres.pdf" target="_blank" class="flex items-center gap-2 bg-white/40 text-[#5B4970] border border-[#B8A9C9]/30 px-4 py-2 rounded-lg font-label-sm text-label-sm hover:bg-white/60 transition-colors">
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+Open Full Page
+</a>
+</div>
+<div class="flex-1 p-4">
+<iframe src="jres.pdf" class="w-full h-full rounded-lg border border-[#B8A9C9]/20" style="min-height:420px;"></iframe>
+</div>
+</div>
+</div>
+<!-- Gallery Window -->
+<div class="draggable-window w-full max-w-lg bg-white/50 backdrop-blur-2xl rounded-xl border border-[#E8A0BF]/30 shadow-2xl overflow-hidden flex flex-col z-30 transition-all duration-300 left-[350px] top-[250px] opacity-0 pointer-events-none scale-95" id="window-gallery">
+<div class="window-header pastel-header h-8 flex items-center px-4 gap-2">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#FFB3BA] cursor-pointer" onclick="closeWindow('window-gallery')"></div>
+<div class="w-3 h-3 rounded-full bg-[#FFFFBA]"></div>
+<div class="w-3 h-3 rounded-full bg-[#BAFFC9]"></div>
+</div>
+<div class="flex-1 text-center font-label-sm text-label-sm text-white pointer-events-none">gallery.txt</div>
+<button class="material-symbols-outlined text-white text-[18px] close-btn ml-auto" onclick="closeWindow('window-gallery')">close</button>
+</div>
+<div class="p-window-padding bg-[#BAE1FF]/10 h-[300px] overflow-y-auto text-[#5B4970] flex flex-col items-center justify-center">
+<h2 class="font-headline-md text-xl mb-4">Gallery</h2>
+<p class="font-body-md lcd-text">Coming soon...</p>
+</div>
+</div>
+<div class="draggable-window sticky-note absolute bottom-32 right-8 w-52 bg-[#FFF9C4]/90 backdrop-blur-sm shadow-xl p-4 rotate-2 hover:rotate-0 transition-all duration-300 cursor-move z-20 border-b-4 border-[#FFDFBA]/60" id="sticky-things-i-love">
+  <div class="window-header flex items-center justify-between mb-2 border-b border-[#E8A0BF]/30 pb-1">
+    <span class="font-label-sm text-[10px] text-[#5B4970] font-bold uppercase tracking-wider">Things I love ♡</span>
+    <span class="material-symbols-outlined text-[#E8A0BF] text-sm">push_pin</span>
+  </div>
+  <div class="font-body-md text-xs text-[#5B4970] flex flex-col gap-0.5 leading-relaxed">
+    <p>🤖 AI</p>
+    <p>💻 Coding</p>
+    <p>📚 Books</p>
+    <p>🎌 Anime</p>
+    <p>🎀 Hello Kitty</p>
+    <p>🦸 Marvel</p>
+    <p>☕ Cafés</p>
+    <p>🎵 BTS</p>
+    <p>🎭 K-Dramas</p>
+    <p>🎤 Music</p>
+    <p>👾 Learning new things</p>
+  </div>
+</div></div>
+</main>
+<!-- Action Dock -->
+<div class="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 bg-white/40 backdrop-blur-xl px-6 py-3 rounded-2xl border border-white/50 shadow-2xl flex items-center gap-4">
+<button class="flex flex-col items-center gap-1 group transition-all duration-300 hover:scale-110" onclick="openWindow('window-resume')">
+<div class="w-12 h-12 bg-[#E8A0BF] rounded-xl flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-2xl">description</span>
+</div>
+<span class="text-[10px] font-label-sm text-[#5B4970] opacity-0 group-hover:opacity-100 transition-opacity">Resume</span>
+</button>
+<div class="w-px h-8 bg-[#B8A9C9]/30 mx-1"></div>
+<a class="flex flex-col items-center gap-1 group transition-all duration-300 hover:scale-110" href="https://github.com/strawberryminmin" target="_blank" rel="noopener">
+<div class="w-12 h-12 bg-[#BAE1FF]/60 hover:bg-[#BAE1FF] rounded-xl flex items-center justify-center border border-white/30">
+<span class="material-symbols-outlined text-[#5B4970] text-2xl">code</span>
+</div>
+<span class="text-[10px] font-label-sm text-[#5B4970] opacity-0 group-hover:opacity-100 transition-opacity">GitHub</span>
+</a>
+<a class="flex flex-col items-center gap-1 group transition-all duration-300 hover:scale-110" href="https://www.linkedin.com/in/jasminetripathy/" target="_blank" rel="noopener">
+<div class="w-12 h-12 bg-[#BAFFC9]/60 hover:bg-[#BAFFC9] rounded-xl flex items-center justify-center border border-white/30">
+<span class="material-symbols-outlined text-[#5B4970] text-2xl">account_circle</span>
+</div>
+<span class="text-[10px] font-label-sm text-[#5B4970] opacity-0 group-hover:opacity-100 transition-opacity">LinkedIn</span>
+</a>
+<a class="flex flex-col items-center gap-1 group transition-all duration-300 hover:scale-110" href="mailto:jasminetrip123@gmail.com">
+<div class="w-12 h-12 bg-[#FFDFBA]/60 hover:bg-[#FFDFBA] rounded-xl flex items-center justify-center border border-white/30">
+<span class="material-symbols-outlined text-[#5B4970] text-2xl">mail</span>
+</div>
+<span class="text-[10px] font-label-sm text-[#5B4970] opacity-0 group-hover:opacity-100 transition-opacity">Email</span>
+</a>
+</div>
+<footer class="absolute bottom-2 w-full flex justify-center items-center pointer-events-none z-50 py-2">
+<p class="font-label-sm text-[10px] text-[#5B4970] font-semibold opacity-90 uppercase tracking-widest">
+        © 2025 JASMINE OS – Built with 🎀 by Jasmine Tripathy
+    </p>
+</footer>
+<script>
+    // Toggle all sticky notes visibility
+    function toggleStickyNotes() {
+        document.querySelectorAll('.sticky-note').forEach(note => {
+            if (note.classList.contains('opacity-0')) {
+                note.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                highestZIndex++;
+                note.style.zIndex = highestZIndex;
+            } else {
+                note.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            }
+        });
+    }
+    function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        const strTime = hours + ':' + minutes + ' ' + ampm;
+        const clockEl = document.getElementById('clock');
+        if(clockEl) clockEl.textContent = strTime;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    let highestZIndex = 50;
+
+    function openWindow(id) {
+        const win = document.getElementById(id);
+        if (!win) return;
+        highestZIndex++;
+        win.style.zIndex = highestZIndex;
+        win.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+    }
+
+    function closeWindow(id) {
+        const win = document.getElementById(id);
+        if (!win) return;
+        win.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+    }
+
+    const projectsData = [
+        {
+            title: 'Kiri – GenAI Medical Assistant',
+            status: 'Completed · 2026',
+            desc: 'A GenAI-powered medical assistant built to make healthcare conversations a little smarter and more accessible. Kiri uses LLMs and LangChain to understand user queries and generate context-aware responses, with a focus on conversational and multilingual interaction. Basically, a project where I taught AI to have slightly more useful conversations than “Have you tried turning it off and on again?”',
+            tags: ['Python', 'LangChain', 'LLMs', 'Generative AI', 'Flask'],
+            github: 'https://github.com/strawberryminmin/kiri'
+        },
+        {
+            title: 'Atlas – AI Healthcare Voice Assistant',
+            status: 'Completed · 2026',
+            desc: 'An AI-powered healthcare assistant that lets users interact through voice, because sometimes typing out a long list of symptoms is the last thing you want to do when you’re feeling unwell. Atlas combines speech recognition, NLP, translation, and text-to-speech to provide multilingual healthcare assistance, symptom analysis, risk assessment, and report generation.',
+            tags: ['Python', 'Flask', 'NLP', 'Speech Recognition', 'gTTS', 'Google Translate', 'HTML/CSS'],
+            github: 'https://github.com/strawberryminmin/Atlas'
+        },
+        {
+            title: 'NexusParse – Resume Analyzer',
+            status: 'Completed · 2026',
+            desc: 'A resume analysis project built to take the pain out of going through resumes manually. NexusParse extracts relevant information from resumes and turns unstructured documents into useful, structured insights—because apparently making a computer read resumes is easier than making recruiters do it.',
+            tags: ['JavaScript', 'React', 'Vite', 'Tailwind CSS', 'PDF.js'],
+            github: 'https://github.com/strawberryminmin/NexusParse'
+        }
+    ];
+
+    function selectProject(index) {
+        const p = projectsData[index];
+        if (!p) return;
+        document.getElementById('proj-title').textContent = p.title;
+        document.getElementById('proj-status').textContent = p.status;
+        document.getElementById('proj-desc').textContent = p.desc;
+        const tagsEl = document.getElementById('proj-tags');
+        const tagColors = ['#B8A9C9', '#E8A0BF', '#A8D8EA', '#BAFFC9', '#FFB3BA', '#FFDFBA'];
+        tagsEl.innerHTML = p.tags.map((t, i) => {
+            const bg = tagColors[i % tagColors.length];
+            const textCol = ['#B8A9C9', '#E8A0BF'].includes(bg) ? 'white' : '#5B4970';
+            return `<span class="text-[12px] px-3 py-1 rounded-full font-label-sm" style="background:${bg};color:${textCol}">${t}</span>`;
+        }).join('');
+        // GitHub link
+        const ghEl = document.getElementById('proj-github');
+        if (ghEl) {
+            ghEl.href = p.github;
+        }
+        // Highlight active sidebar item
+        document.querySelectorAll('.project-sidebar-item').forEach(btn => {
+            btn.classList.remove('bg-[#E8A0BF]/15');
+        });
+        document.querySelector(`.project-sidebar-item[data-project="${index}"]`)?.classList.add('bg-[#E8A0BF]/15');
+    }
+
+    document.querySelectorAll('.draggable-window').forEach(win => {
+        const header = win.querySelector('.window-header');
+        if (!header) return;
+
+        let isDragging = false;
+        let startX, startY, origLeft, origTop;
+        let animFrame = null;
+        let currentDx = 0, currentDy = 0;
+
+        // Set grab cursor on headers
+        header.style.cursor = 'grab';
+
+        // Promote window to its own GPU layer for smoother compositing
+        win.style.willChange = 'transform';
+
+        win.addEventListener('mousedown', () => {
+            highestZIndex++;
+            win.style.zIndex = highestZIndex;
+        });
+
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') || e.target.closest('.w-3')) return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Disable transitions while dragging
+            win.style.transition = 'none';
+
+            // If window uses CSS translate (e.g. centered profile window), bake it into left/top
+            const rect = win.getBoundingClientRect();
+            if (win.style.transform && win.style.transform.includes('translate')) {
+                win.style.transform = 'none';
+                win.style.left = rect.left + 'px';
+                win.style.top = rect.top + 'px';
+            }
+
+            origLeft = win.offsetLeft;
+            origTop = win.offsetTop;
+            currentDx = 0;
+            currentDy = 0;
+
+            // Reduce backdrop-blur during drag for GPU performance
+            win.style.backdropFilter = 'blur(4px)';
+            win.style.webkitBackdropFilter = 'blur(4px)';
+
+            // Grabbing cursor
+            header.style.cursor = 'grabbing';
+            document.body.style.cursor = 'grabbing';
+            document.body.style.userSelect = 'none';
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            currentDx = e.clientX - startX;
+            currentDy = e.clientY - startY;
+
+            // Use rAF to batch DOM writes to the next paint frame
+            if (!animFrame) {
+                animFrame = requestAnimationFrame(updatePosition);
+            }
+        }
+
+        function updatePosition() {
+            animFrame = null;
+            if (!isDragging) return;
+            // Use translate3d for GPU-accelerated compositing (no layout reflow)
+            const newTop = Math.max(32 - origTop, currentDy);
+            win.style.transform = `translate3d(${currentDx}px, ${newTop === currentDy ? currentDy : newTop}px, 0)`;
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            if (animFrame) {
+                cancelAnimationFrame(animFrame);
+                animFrame = null;
+            }
+
+            // Bake the final transform into left/top so future drags start correctly
+            win.style.left = `${origLeft + currentDx}px`;
+            win.style.top = `${Math.max(32, origTop + currentDy)}px`;
+            win.style.transform = 'none';
+
+            // Restore backdrop blur
+            win.style.backdropFilter = '';
+            win.style.webkitBackdropFilter = '';
+
+            // Re-enable transitions for open/close animations
+            win.style.transition = '';
+
+            // Restore cursor
+            header.style.cursor = 'grab';
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    });
+
+    const rotatePromptOverlay = document.getElementById('rotate-prompt');
+    const rotatePromptDismiss = document.getElementById('rotate-prompt-dismiss');
+    let rotatePromptDismissed = false;
+
+    function updateRotatePrompt() {
+        const isMobile = window.matchMedia('(max-width: 900px)').matches;
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+        if (!rotatePromptOverlay) return;
+        if (isMobile && isPortrait && !rotatePromptDismissed) {
+            rotatePromptOverlay.classList.add('active');
+        } else {
+            rotatePromptOverlay.classList.remove('active');
+        }
+    }
+
+    rotatePromptDismiss?.addEventListener('click', () => {
+        rotatePromptDismissed = true;
+        rotatePromptOverlay?.classList.remove('active');
+    });
+
+    window.addEventListener('resize', updateRotatePrompt);
+    window.addEventListener('orientationchange', () => {
+        rotatePromptDismissed = false;
+        updateRotatePrompt();
+    });
+    updateRotatePrompt();
+</script>
+
+
+</body></html>
